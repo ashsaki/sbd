@@ -1,3 +1,39 @@
- Elapsed time for helper construction 0.033578 (sec) 
- Elapsed time for init 1.9e-05 (sec) 
- Elapsed time for makeQChamDiagTerms 0.205857 (sec) 
+Accelerator Fatal Error: Failed to find device function 'nvkernel__ZN3sbd11CorrelationIdEEvRKSt6vectorIT_SaIS2_EERKS1_IS1_ImSaImEESaIS8_EESC_mmmmRKS1_INS_11TaskHelpersESaISD_EEiiiRS1_IS4_SaIS4_EESK__F541L254_83'! File was compiled with: -gpu=cc90
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 0
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 1
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 2
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 3
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 4
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 5
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 6
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 7
+ File: /home/saki/codes/saki-for-sbd/sbd/apps/chemistry_tpb_selected_basis_diagonalization/../../include/sbd/chemistry/tpb/mult.h
+ Function: _ZN3sbd4multIdEEvRKSt6vectorIT_SaIS2_EES6_RS4_RKS1_IS1_ImSaImEESaIS9_EESD_mmmmRKS1_INS_11TaskHelpersESaISE_EERKS2_RKNS_6oneIntIS2_EERKNS_6twoIntIS2_EEiii:130
+ Line: 304
+
+Accelerator Fatal Error: Failed to find device function 'nvkernel__ZN3sbd11CorrelationIdEEvRKSt6vectorIT_SaIS2_EERKS1_IS1_ImSaImEESaIS8_EESC_mmmmRKS1_INS_11TaskHelpersESaISD_EEiiiRS1_IS4_SaIS4_EESK__F541L254_83'! File was compiled with: -gpu=cc90
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 0
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 1
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 2
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 3
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 4
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 5
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 6
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 7
+ File: /home/saki/codes/saki-for-sbd/sbd/apps/chemistry_tpb_selected_basis_diagonalization/../../include/sbd/chemistry/tpb/mult.h
+ Function: _ZN3sbd4multIdEEvRKSt6vectorIT_SaIS2_EES6_RS4_RKS1_IS1_ImSaImEESaIS9_EESD_mmmmRKS1_INS_11TaskHelpersESaISE_EERKS2_RKNS_6oneIntIS2_EERKNS_6twoIntIS2_EEiii:130
+ Line: 304
+
+Accelerator Fatal Error: Failed to find device function 'nvkernel__ZN3sbd11CorrelationIdEEvRKSt6vectorIT_SaIS2_EERKS1_IS1_ImSaImEESaIS8_EESC_mmmmRKS1_INS_11TaskHelpersESaISD_EEiiiRS1_IS4_SaIS4_EESK__F541L254_83'! File was compiled with: -gpu=cc90
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 0
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 1
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 2
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 3
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 4
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 5
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 6
+Rebuild this file with -gpu=cc90 to use NVIDIA Tesla GPU 7
+ File: /home/saki/codes/saki-for-sbd/sbd/apps/chemistry_tpb_selected_basis_diagonalization/../../include/sbd/chemistry/tpb/mult.h
+ Function: _ZN3sbd4multIdEEvRKSt6vectorIT_SaIS2_EES6_RS4_RKS1_IS1_ImSaImEESaIS9_EESD_mmmmRKS1_INS_11TaskHelpersESaISE_EERKS2_RKNS_6oneIntIS2_EERKNS_6twoIntIS2_EEiii:130
+ Line: 304
+
