@@ -17828,16 +17828,15 @@ void sbd::Correlation<double>(std::vector<double, std::allocator<double>> const&
           60, Loop not vectorized: recurrence
           64, Loop not vectorized: recurrence
          150, FMA (fused multiply-add) instruction(s) generated
-         256, FMA (fused multiply-add) instruction(s) generated
-         257, FMA (fused multiply-add) instruction(s) generated
+         259, FMA (fused multiply-add) instruction(s) generated
+         260, FMA (fused multiply-add) instruction(s) generated
     237, void sbd::OneDiffCorrelation<double>(unsigned long const*, double, double, unsigned long, unsigned long, int, int, double*, double*) inlined, size=119 (inline) file ../../include/sbd/chemistry/basic/correlation.h (147)
          150, Generated vector simd code for the loop containing reductions
-         162, Accelerator restriction: unsupported operation: UKNEG
-              Loop not vectorized/parallelized: not countable
-    248, void sbd::TwoDiffCorrelation<double>(unsigned long const*, double, double, unsigned long, unsigned long, int, int, int, int, double*, double*) inlined, size=182 (inline) file ../../include/sbd/chemistry/basic/correlation.h (248)
+         162, Loop not vectorized/parallelized: not countable
+    248, void sbd::TwoDiffCorrelation<double>(unsigned long const*, double, double, unsigned long, unsigned long, int, int, int, int, double*, double*) inlined, size=182 (inline) file ../../include/sbd/chemistry/basic/correlation.h (251)
          222, Loop not vectorized/parallelized: too deeply nested
-         256, Generated vector simd code for the loop containing reductions
-         257, Generated vector simd code for the loop containing reductions
+         259, Generated vector simd code for the loop containing reductions
+         260, Generated vector simd code for the loop containing reductions
     254, std::vector<sbd::TaskHelpers, std::allocator<sbd::TaskHelpers>>::operator[](unsigned long) const inlined, size=3 (inline) file ../../include/sbd/chemistry/tpb/helper.h (1062)
     272, sbd::DetFromAlphaBeta(unsigned long const*, unsigned long const*, unsigned long, unsigned long, unsigned long*) inlined, size=76 (inline) file /usr/include/c++/11/bits/stl_vector.h (34)
           42, Loop not vectorized: data dependency
@@ -17845,26 +17844,25 @@ void sbd::Correlation<double>(std::vector<double, std::allocator<double>> const&
           60, Loop not vectorized: recurrence
           64, Loop not vectorized: recurrence
          150, FMA (fused multiply-add) instruction(s) generated
-         256, FMA (fused multiply-add) instruction(s) generated
-         257, FMA (fused multiply-add) instruction(s) generated
+         259, FMA (fused multiply-add) instruction(s) generated
+         260, FMA (fused multiply-add) instruction(s) generated
     281, void sbd::OneDiffCorrelation<double>(unsigned long const*, double, double, unsigned long, unsigned long, int, int, double*, double*) inlined, size=119 (inline) file ../../include/sbd/chemistry/basic/correlation.h (147)
          150, Generated vector simd code for the loop containing reductions
-         162, Accelerator restriction: unsupported operation: UKNEG
-              Loop not vectorized/parallelized: not countable
-    292, void sbd::TwoDiffCorrelation<double>(unsigned long const*, double, double, unsigned long, unsigned long, int, int, int, int, double*, double*) inlined, size=182 (inline) file ../../include/sbd/chemistry/basic/correlation.h (248)
-         256, Generated vector simd code for the loop containing reductions
-         257, Generated vector simd code for the loop containing reductions
+         162, Loop not vectorized/parallelized: not countable
+    292, void sbd::TwoDiffCorrelation<double>(unsigned long const*, double, double, unsigned long, unsigned long, int, int, int, int, double*, double*) inlined, size=182 (inline) file ../../include/sbd/chemistry/basic/correlation.h (251)
+         259, Generated vector simd code for the loop containing reductions
+         260, Generated vector simd code for the loop containing reductions
          266, Loop not vectorized/parallelized: too deeply nested
     316, sbd::DetFromAlphaBeta(unsigned long const*, unsigned long const*, unsigned long, unsigned long, unsigned long*) inlined, size=76 (inline) file /usr/include/c++/11/bits/stl_vector.h (34)
           42, Loop not vectorized: data dependency
           52, Loop not vectorized: recurrence
           60, Loop not vectorized: recurrence
           64, Loop not vectorized: recurrence
-         256, FMA (fused multiply-add) instruction(s) generated
-         257, FMA (fused multiply-add) instruction(s) generated
-    330, void sbd::TwoDiffCorrelation<double>(unsigned long const*, double, double, unsigned long, unsigned long, int, int, int, int, double*, double*) inlined, size=182 (inline) file ../../include/sbd/chemistry/basic/correlation.h (248)
-         256, Generated vector simd code for the loop containing reductions
-         257, Generated vector simd code for the loop containing reductions
+         259, FMA (fused multiply-add) instruction(s) generated
+         260, FMA (fused multiply-add) instruction(s) generated
+    330, void sbd::TwoDiffCorrelation<double>(unsigned long const*, double, double, unsigned long, unsigned long, int, int, int, int, double*, double*) inlined, size=182 (inline) file ../../include/sbd/chemistry/basic/correlation.h (251)
+         259, Generated vector simd code for the loop containing reductions
+         260, Generated vector simd code for the loop containing reductions
     343, std::vector<sbd::TaskHelpers, std::allocator<sbd::TaskHelpers>>::size() const inlined, size=4 (inline) file ../../include/sbd/chemistry/tpb/helper.h (919)
     343, std::vector<sbd::TaskHelpers, std::allocator<sbd::TaskHelpers>>::operator[](unsigned long) const inlined, size=3 (inline) file ../../include/sbd/chemistry/tpb/helper.h (1062)
     344, std::vector<sbd::TaskHelpers, std::allocator<sbd::TaskHelpers>>::operator[](unsigned long) const inlined, size=3 (inline) file ../../include/sbd/chemistry/tpb/helper.h (1062)
@@ -18479,8 +18477,9 @@ void sbd::OneDiffCorrelation<double>(unsigned long const*, double, double, unsig
            5, include "inc_all.h"
                 4, include "inc_all.h"
                     18, include "correlation.h"
+                        147, Generating implicit omp declare target routine
+                             Generating NVIDIA GPU code
                         162, Loop not vectorized/parallelized: not countable
-                        167, Accelerator restriction: unsupported operation: UKNEG
                     20, include "makeintegrals.h"
                 6, include "inc_all.h"
     150, int const& std::max<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (255)
@@ -18490,38 +18489,38 @@ void sbd::OneDiffCorrelation<double>(unsigned long const*, double, double, unsig
          104, FMA (fused multiply-add) instruction(s) generated
     150, int const& std::min<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (231)
     158, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
-    173, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
-    175, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
-    179, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
-    181, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
+    176, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
+    178, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
+    182, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
+    184, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
 void sbd::TwoDiffCorrelation<double>(unsigned long const*, double, double, unsigned long, unsigned long, int, int, int, int, double*, double*):
      12, include "sbd.h"
            5, include "inc_all.h"
                 4, include "inc_all.h"
                     18, include "correlation.h"
-                        248, Generating implicit omp declare target routine
+                        251, Generating implicit omp declare target routine
                              Generating NVIDIA GPU code
                     20, include "makeintegrals.h"
                 6, include "inc_all.h"
-    252, int const& std::min<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (231)
-    253, int const& std::max<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (255)
-    254, int const& std::min<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (231)
-    255, int const& std::max<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (255)
+    255, int const& std::min<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (231)
     256, int const& std::max<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (255)
-    256, sbd::parity_device(unsigned long const*, unsigned long, int, int, double&) inlined, size=31 (inline) file /usr/include/c++/11/bits/stl_vector.h (73)
+    257, int const& std::min<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (231)
+    258, int const& std::max<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (255)
+    259, int const& std::max<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (255)
+    259, sbd::parity_device(unsigned long const*, unsigned long, int, int, double&) inlined, size=31 (inline) file /usr/include/c++/11/bits/stl_vector.h (73)
           94, Loop not fused: complex flow graph
               Generated vector simd code for the loop containing reductions
          104, FMA (fused multiply-add) instruction(s) generated
-    256, int const& std::min<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (231)
-    257, int const& std::max<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (255)
-    257, sbd::parity_device(unsigned long const*, unsigned long, int, int, double&) inlined, size=31 (inline) file /usr/include/c++/11/bits/stl_vector.h (73)
+    259, int const& std::min<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (231)
+    260, int const& std::max<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (255)
+    260, sbd::parity_device(unsigned long const*, unsigned long, int, int, double&) inlined, size=31 (inline) file /usr/include/c++/11/bits/stl_vector.h (73)
           94, Loop not fused: complex flow graph
               Generated vector simd code for the loop containing reductions
-    257, int const& std::min<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (231)
-    270, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
-    272, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
-    277, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
-    279, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
+    260, int const& std::min<int>(int const&, int const&) inlined, size=3 (inline) file ../../include/sbd/chemistry/basic/integrals.h (231)
+    273, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
+    275, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
+    280, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
+    282, double sbd::Conjugate<double>(double) inlined, size=1 (inline) file ../../include/sbd/framework/dm_vector.h (32)
 void sbd::DiagonalAdetReducedDensityMatrix<double, double>(std::vector<double, std::allocator<double>> const&, unsigned long, unsigned long, unsigned long, unsigned long, int, std::vector<double, std::allocator<double>>&):
      12, include "sbd.h"
            5, include "inc_all.h"
