@@ -1,0 +1,21 @@
+Makefile:19: warning: ignoring prerequisites on suffix rule definition
+rm -f main.o
+mpicxx -c -O3 -std=c++17 -tp=host -mp=gpu -gpu=ccnative -DSBD_TRADMODE -DUSE_GPU -DUSE_OMP_OFFLOAD --diag_suppress declared_but_not_referenced  -I../../include main.cc
+"../../include/sbd/chemistry/tpb/helper.h", line 861: warning: variable "braAlphaSize" was set but never used [set_but_not_used]
+    size_t braAlphaSize = 0;
+           ^
+
+Remark: individual warnings can be suppressed with "--diag_suppress <warning-name>"
+
+"../../include/sbd/chemistry/tpb/sbdiag.h", line 724: warning: variable "N" was set but never used [set_but_not_used]
+        size_t N;
+               ^
+
+"../../include/sbd/framework/mpi_utility.h", line 657: warning: The use of use_device_ptr is deprecated, use use_device_addr instead [omp_use_device_ptr_deprecated]
+  #pragma omp target data use_device_ptr(A_ptr, B_ptr)
+                          ^
+          detected during:
+            instantiation of "void sbd::Mpi2dSlide(const ElemT *, size_t &, ElemT *, size_t &, int, int, int, int, MPI_Comm) [with ElemT=double]" at line 584 of "../../include/sbd/chemistry/tpb/mult.h"
+            instantiation of "void sbd::mult(const std::vector<ElemT, std::allocator<ElemT>> &, const std::vector<ElemT, std::allocator<ElemT>> &, std::vector<ElemT, std::allocator<ElemT>> &, const std::vector<std::vector<size_t, std::allocator<size_t>>, std::allocator<std::vector<size_t, std::allocator<size_t>>>> &, const std::vector<std::vector<size_t, std::allocator<size_t>>, std::allocator<std::vector<size_t, std::allocator<size_t>>>> &, size_t, size_t, size_t, size_t, const std::vector<sbd::TaskHelpers, std::allocator<sbd::TaskHelpers>> &, const ElemT &, const sbd::oneInt<ElemT> &, const sbd::twoInt<ElemT> &, MPI_Comm, MPI_Comm, MPI_Comm) [with ElemT=double]" at line 380 of "../../include/sbd/chemistry/tpb/sbdiag.h"
+
+mpicxx -o diag main.o  -mp=gpu -gpu=ccnative -L/home/saki/miniforge3/envs/fq12/lib -Wl,-rpath,/home/saki/miniforge3/envs/fq12/lib -llapack -lblas
