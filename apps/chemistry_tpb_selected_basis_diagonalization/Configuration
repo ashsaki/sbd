@@ -20,10 +20,10 @@ SBD_PATH=../..
 #     target (e.g. -tp=sapphirerapids) if you prefer to pin it.
 #   - -mp=gpu enables OpenMP with GPU offload (also covers host multicore OpenMP).
 #====================================================================================
-  CCFLAGS  = -O3 -std=c++17 -tp=host -mp=gpu -gpu=cc90,nordc \
+  CCFLAGS  = -O3 -std=c++17 -tp=host -mp=gpu -gpu=cc90 -Minfo=accel \
              -DSBD_TRADMODE -DUSE_GPU -DUSE_OMP_OFFLOAD \
              --diag_suppress declared_but_not_referenced
-  LDFLAGS += -mp=gpu -gpu=cc90,nordc
+  LDFLAGS += -mp=gpu -gpu=cc90
 
 # --- CPU-ONLY fallback with nvc++ (drop the GPU flags) -----------------------------
 # CCFLAGS = -O3 -std=c++17 -tp=host -mp -DSBD_TRADMODE --diag_suppress declared_but_not_referenced
