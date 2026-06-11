@@ -162,9 +162,12 @@ namespace sbd {
       while(bits != 0) {
         // 1-based index of the lowest set bit (== __builtin_ffsl for bits!=0).
         // nvc++ lowers __builtin_ffsl to the host-only runtime symbol
-        // __btl_pgi_ffsl, which nvlink cannot resolve in device code; popcount
-        // does lower correctly on the device, so derive ffs from it instead.
-        int pos = __builtin_popcountll((bits & -bits) - 1) + 1;
+        // __btl_pgi_ffsl (unresolved by nvlink), and a unary minus on an
+        // unsigned (bits & -bits) is rejected by the GPU backend as an
+        // unsupported UKNEG operation. Both are avoided here: (bits-1) & ~bits
+        // isolates exactly the trailing-zero bits, so popcount of it is the
+        // number of trailing zeros, and +1 gives the 1-based ffs position.
+        int pos = __builtin_popcountll((bits - 1) & ~bits) + 1;
         int soj = x * bit_length + pos - 1;
         int oj = soj / 2;
         int sj = soj % 2;
