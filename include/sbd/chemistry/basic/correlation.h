@@ -160,7 +160,11 @@ namespace sbd {
     for(int x=0; x < detSize; x++) {
       size_t bits = DetI[x];
       while(bits != 0) {
-        int pos = __builtin_ffsl(bits);
+        // 1-based index of the lowest set bit (== __builtin_ffsl for bits!=0).
+        // nvc++ lowers __builtin_ffsl to the host-only runtime symbol
+        // __btl_pgi_ffsl, which nvlink cannot resolve in device code; popcount
+        // does lower correctly on the device, so derive ffs from it instead.
+        int pos = __builtin_popcountll((bits & -bits) - 1) + 1;
         int soj = x * bit_length + pos - 1;
         int oj = soj / 2;
         int sj = soj % 2;
