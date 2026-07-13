@@ -22,16 +22,29 @@ namespace sbd {
       int init = 0;
       int do_shuffle = 0;
       int do_rdm = 0;
+      int carryover_type = 0;
       double ratio = 0.0;
       double threshold = 0.01;
+      double heatbath_cutoff = 1.0e-4;
+      double heatbath_truncation = 0.0;
+      size_t heatbath_batch_size = 200000000;
       size_t bit_length = 20;
+      size_t seed = 1729;
+      bool timing_barriers = false;
       bool do_sort_det = false;
       bool do_redist_det = false;
+      bool do_redist_alpha_eq = true;
     };
 
     SBD generate_sbd_data(int argc, char * argv[]) {
       SBD sbd_data;
       for(int i=0; i < argc; i++) {
+	if ( std::string(argv[i]) == "--init" ) {
+	  sbd_data.init = std::atoi(argv[++i]);
+	}
+	if ( std::string(argv[i]) == "--seed" ) {
+	  sbd_data.seed = std::atoi(argv[++i]);
+	}
 	if ( std::string(argv[i]) == "--b_comm_size" ) {
 	  sbd_data.b_comm_size = std::atoi(argv[++i]);
 	}
@@ -50,11 +63,23 @@ namespace sbd {
 	if ( std::string(argv[i]) == "--tolerance" ) {
 	  sbd_data.eps = std::atof(argv[++i]);
 	}
+	if ( std::string(argv[i]) == "--carryover_type" ) {
+	  sbd_data.carryover_type = std::atoi(argv[++i]);
+	}
 	if ( std::string(argv[i]) == "--carryover_ratio" ) {
 	  sbd_data.ratio = std::atof(argv[++i]);
 	}
 	if ( std::string(argv[i]) == "--carryover_threshold" ) {
 	  sbd_data.threshold = std::atof(argv[++i]);
+	}
+	if ( std::string(argv[i]) == "--heatbath_cutoff" ) {
+	  sbd_data.heatbath_cutoff = std::atof(argv[++i]);
+	}
+	if ( std::string(argv[i]) == "--heatbath_truncation" ) {
+	  sbd_data.heatbath_truncation = std::atof(argv[++i]);
+	}
+	if ( std::string(argv[i]) == "--heatbath_batch_size" ) {
+	  sbd_data.heatbath_batch_size = std::atoi(argv[++i]);
 	}
 	if ( std::string(argv[i]) == "--shuffle" ) {
 	  sbd_data.do_shuffle = std::atoi(argv[++i]);
@@ -65,6 +90,9 @@ namespace sbd {
 	if ( std::string(argv[i]) == "--bit_length" ) {
 	  sbd_data.bit_length = std::atoi(argv[++i]);
 	}
+	if( std::string(argv[i]) == "--timing_barriers" ) {
+	  sbd_data.timing_barriers = ( std::atoi(argv[++i]) != 0 );
+	}
 	if( std::string(argv[i]) == "--do_sort_det" ) {
 	  if( std::atoi(argv[++i]) != 0 ) {
 	    sbd_data.do_sort_det = true;
@@ -74,6 +102,9 @@ namespace sbd {
 	  if( std::atoi(argv[++i]) != 0 ) {
 	    sbd_data.do_redist_det = true;
 	  }
+	}
+	if( std::string(argv[i]) == "--do_redist_alpha_eq" ) {
+	  sbd_data.do_redist_alpha_eq = ( std::atoi(argv[++i]) != 0 );
 	}
       }
       return sbd_data;
@@ -93,13 +124,25 @@ namespace sbd {
       std::cout << "# block size: " << sbd_data.max_nb << std::endl;
       std::cout << "# tolerance: " << sbd_data.eps << std::endl;
       std::cout << "# init method: " << sbd_data.init << std::endl;
+      std::cout << "# seed for initialization: " << sbd_data.seed << std::endl;
       std::cout << "# bit length: " << sbd_data.bit_length << std::endl;
+      std::cout << "# timing_barriers: " << sbd_data.timing_barriers << std::endl;
       std::cout << "# do basis sort: " << sbd_data.do_sort_det << std::endl;
       std::cout << "# do redistribution of basis: " << sbd_data.do_redist_det << std::endl;
+      std::cout << "# do equal-bra_a redistribution: " << sbd_data.do_redist_alpha_eq << std::endl;
       if( sbd_data.do_rdm != 0.0 ) {
 	std::cout << "# do rdm: " << sbd_data.do_rdm << std::endl;
       }
-      std::cout << "# carryover ratio: " << sbd_data.ratio << std::endl;
+      if( sbd_data.carryover_type == 0 ) {
+	std::cout << "# carryover type: none" << std::endl;
+      } else  if( sbd_data.carryover_type == 1 ) {
+	std::cout << "# carryover type: weight truncation" << std::endl;
+	std::cout << "# carryover ratio: " << sbd_data.ratio << std::endl;
+      } else if ( sbd_data.carryover_type == 2 || sbd_data.carryover_type == 3 ) {
+	std::cout << "# carryover type: heatbath expansion" << std::endl;
+	std::cout << "# heatbath truncation: " << sbd_data.heatbath_truncation << std::endl;
+	std::cout << "# heatbath cutoff: " << sbd_data.heatbath_cutoff << std::endl;
+      }
     }
 
     /**
@@ -120,12 +163,12 @@ namespace sbd {
     void diag(const MPI_Comm & comm,
 	      const SBD & sbd_data,
 	      const sbd::FCIDump & fcidump,
-	      const std::vector<std::vector<size_t>> & det,
+	      const sbd::det_vector<size_t> & det,
 	      const std::string & loadname,
 	      const std::string & savename,
 	      double & energy,
 	      std::vector<double> & density,
-	      std::vector<std::vector<size_t>> & rdet,
+	      sbd::det_vector<size_t> & rdet,
 	      std::vector<std::vector<ElemT>> & one_p_rdm,
 	      std::vector<std::vector<ElemT>> & two_p_rdm) {
       int mpi_master = 0;
@@ -140,28 +183,35 @@ namespace sbd {
 #ifdef SBD_THRUST
 	  method &= 1;
 #endif
-	  int max_it = sbd_data.max_it;
+      int max_it = sbd_data.max_it;
       int max_nb = sbd_data.max_nb;
       double eps = sbd_data.eps;
       double max_time = sbd_data.max_time;
       int init = sbd_data.init;
+      size_t seed = sbd_data.seed;
       int do_shuffle = sbd_data.do_shuffle;
       int do_rdm = sbd_data.do_rdm;
       double ratio = sbd_data.ratio;
       double threshold = sbd_data.threshold;
+      int co_type = sbd_data.carryover_type;
+      double hb_truncation = sbd_data.heatbath_truncation;
+      double hb_cutoff = sbd_data.heatbath_cutoff;
+      size_t hb_batch_size = sbd_data.heatbath_batch_size;
       size_t bit_length = sbd_data.bit_length;
       /**
 	 Setup system parameters from fcidump
       */
+      if( sbd_data.timing_barriers ) MPI_Barrier(comm);
 	  if( mpi_rank == 0 ) {
 	std::cout << " " << make_timestamp()
 		  << " sbd: start integral construction" << std::endl;
       }
       auto time_start_model = std::chrono::high_resolution_clock::now();
-      double I0;
+      ElemT I0;
       sbd::oneInt<ElemT> I1;
       sbd::twoInt<ElemT> I2;
       sbd::SetupIntegrals(fcidump,L,N,I0,I1,I2);
+      if( sbd_data.timing_barriers ) MPI_Barrier(comm);
       auto time_end_model = std::chrono::high_resolution_clock::now();
       auto elapsed_model_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_model-time_start_model).count();
       double elapsed_model = 1.0e-6 * elapsed_model_count;
@@ -193,6 +243,7 @@ namespace sbd {
       int mpi_size_b; MPI_Comm_size(b_comm,&mpi_size_b);
       int mpi_rank_t; MPI_Comm_rank(t_comm,&mpi_rank_t);
       int mpi_size_t; MPI_Comm_size(t_comm,&mpi_size_t);
+      if( sbd_data.timing_barriers ) MPI_Barrier(comm);
       auto time_end_helper = std::chrono::high_resolution_clock::now();
       auto elapsed_helper_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_helper-time_start_helper).count();
       double elapsed_helper = 1.0e-6 * elapsed_helper_count;
@@ -211,10 +262,11 @@ namespace sbd {
       auto time_start_init = std::chrono::high_resolution_clock::now();
       std::vector<ElemT> w;
       if( loadname.empty() ) {
-	sbd::gdb::BasisInitVector(w,det,h_comm,b_comm,t_comm,init);
+	sbd::gdb::BasisInitVector(w,det,h_comm,b_comm,t_comm,init,seed);
       } else {
 	sbd::LoadWavefunction(loadname,det,h_comm,b_comm,t_comm,w);
       }
+      if( sbd_data.timing_barriers ) MPI_Barrier(comm);
       auto time_end_init = std::chrono::high_resolution_clock::now();
       auto elapsed_init_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_init-time_start_init).count();
       double elapsed_init = 1.0e-6 * elapsed_init_count;
@@ -228,7 +280,7 @@ namespace sbd {
       */
 #ifdef SBD_THRUST
 	// multiplyer class for TPB on Thrust
-	MultGDBThrust<double> device_mult;
+	MultGDBThrust<ElemT> device_mult;
 #endif
       if( method == 0 ) {
 
@@ -251,6 +303,7 @@ namespace sbd {
 			   idxmap,exidx,I0,I1,I2,hii,
 			   h_comm,b_comm,t_comm);
 #endif
+    if( sbd_data.timing_barriers ) MPI_Barrier(comm);
     auto time_end_mkham = std::chrono::high_resolution_clock::now();
 	auto elapsed_mkham_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_mkham-time_start_mkham).count();
 	double elapsed_mkham = 1.0e-6 * elapsed_mkham_count;
@@ -276,6 +329,7 @@ namespace sbd {
 		 h_comm,b_comm,t_comm,
 		 max_it,max_nb,eps);
 #endif
+    if( sbd_data.timing_barriers ) MPI_Barrier(comm);
     auto time_end_david = std::chrono::high_resolution_clock::now();
 	auto elapsed_david_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_david-time_start_david).count();
 	auto elapsed_diag_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_david-time_start_mkham).count();
@@ -299,10 +353,10 @@ namespace sbd {
 	auto time_start_mult = std::chrono::high_resolution_clock::now();
 #ifdef SBD_THRUST
     // copyin W
-    thrust::device_vector<double> w_dev(w.size());
+    thrust::device_vector<ElemT> w_dev(w.size());
     thrust::copy_n(w.begin(), w.size(), w_dev.begin());
 
-    thrust::device_vector<double> v(w.size(), 0.0);
+    thrust::device_vector<ElemT> v(w.size(), ElemT(0.0));
 
 	device_mult.run(hii, w_dev, v);
 
@@ -317,6 +371,7 @@ namespace sbd {
 	InnerProduct(w,v,E,b_comm);
 	energy = GetReal(E);
 #endif
+	if( sbd_data.timing_barriers ) MPI_Barrier(comm);
 	auto time_end_mult = std::chrono::high_resolution_clock::now();
 	auto elapsed_mult_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_mult-time_start_mult).count();
 	double elapsed_mult = 1.0e-6 * elapsed_mult_count;
@@ -351,6 +406,7 @@ namespace sbd {
 		  hii,ih,jh,hij,len,slide,
 		  storage_int,storage_elem,
 		  h_comm,b_comm,t_comm);
+	if( sbd_data.timing_barriers ) MPI_Barrier(comm);
 	auto time_end_mkham = std::chrono::high_resolution_clock::now();
 	auto elapsed_mkham_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_mkham-time_start_mkham).count();
 	double elapsed_mkham = 1.0e-6 * elapsed_mkham_count;
@@ -369,6 +425,7 @@ namespace sbd {
 	auto time_start_david = std::chrono::high_resolution_clock::now();
 	sbd::gdb::Davidson(hii,ih,jh,hij,len,slide,w,
 			   h_comm,b_comm,t_comm,max_it,max_nb,eps);
+	if( sbd_data.timing_barriers ) MPI_Barrier(comm);
 	auto time_end_david = std::chrono::high_resolution_clock::now();
 	auto elapsed_david_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_david-time_start_david).count();
 	auto elapsed_diag_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_david-time_start_mkham).count();
@@ -397,6 +454,7 @@ namespace sbd {
 	InnerProduct(w,v,E,b_comm);
 	std::cout.precision(16);
 	energy = GetReal(E);
+	if( sbd_data.timing_barriers ) MPI_Barrier(comm);
 	auto time_end_mult = std::chrono::high_resolution_clock::now();
 	auto elapsed_mult_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_mult-time_start_mult).count();
 	double elapsed_mult = 1.0e-6 * elapsed_mult_count;
@@ -435,6 +493,7 @@ namespace sbd {
 	  }
 	  MpiAllreduce(density,MPI_SUM,h_comm);
 	}
+	if( sbd_data.timing_barriers ) MPI_Barrier(comm);
 	auto time_end_occd = std::chrono::high_resolution_clock::now();
 	auto elapsed_occd_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_occd-time_start_occd).count();
 	double elapsed_occd = 1.0e-6 * elapsed_occd_count;
@@ -464,6 +523,7 @@ namespace sbd {
 	  density[2*io+0] = GetReal(one_p_rdm[0][io+L*io]);
 	  density[2*io+1] = GetReal(one_p_rdm[1][io+L*io]);
 	}
+	if( sbd_data.timing_barriers ) MPI_Barrier(comm);
 	auto time_end_rdm = std::chrono::high_resolution_clock::now();
 	auto elapsed_rdm_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_rdm-time_start_rdm).count();
 	double elapsed_rdm = 1.0e-6 * elapsed_rdm_count;
@@ -476,22 +536,67 @@ namespace sbd {
       /**
 	 Carryover selection
       */
-      if( ratio != 0.0 ) {
-	if( mpi_rank == 0 ) {
-	  std::cout << " " << make_timestamp()
-		    << " sbd: start carryover selection" << std::endl;
+      if( co_type == 1 ) {
+	if( ratio != 0.0 ) {
+	  if( mpi_rank == 0 ) {
+	    std::cout << " " << make_timestamp()
+		      << " sbd: start carryover selection" << std::endl;
+	  }
+	  auto time_start_co = std::chrono::high_resolution_clock::now();
+	  size_t n_kept = static_cast<size_t>(ratio * det.size()*mpi_size_b);
+	  double truncated_weight = 0.0;
+	  CarryOverDet(w,det,b_comm,n_kept,rdet,truncated_weight);
+	  auto time_end_co = std::chrono::high_resolution_clock::now();
+	  auto elapsed_co_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_co-time_start_co).count();
+	  double elapsed_co = 1.0e-6 * elapsed_co_count;
+	  if( mpi_rank == 0 ) {
+	    std::cout << " " << make_timestamp()
+		      << " sbd: end carryover selection [Elapsed time "
+		      << elapsed_co << " (sec)]" << std::endl;
+	  }
 	}
-	auto time_start_co = std::chrono::high_resolution_clock::now();
-	size_t n_kept = static_cast<size_t>(ratio * det.size()*mpi_size_b);
-	double truncated_weight = 0.0;
-	CarryOverDet(w,det,b_comm,n_kept,rdet,truncated_weight);
-	auto time_end_co = std::chrono::high_resolution_clock::now();
-	auto elapsed_co_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_co-time_start_co).count();
-	double elapsed_co = 1.0e-6 * elapsed_co_count;
+      } else if ( co_type == 2 || co_type == 3 ) {
 	if( mpi_rank == 0 ) {
 	  std::cout << " " << make_timestamp()
-		    << " sbd: end carryover selection [Elapsed time "
-		    << elapsed_co << " (sec)]" << std::endl;
+		    << " sbd: start weight truncation" << std::endl;
+	}
+	auto time_start_wt = std::chrono::high_resolution_clock::now();
+	std::vector<ElemT> cw;
+	sbd::det_vector<size_t> cdet;
+	WeightTruncation(w,det,hb_truncation,cw,cdet);
+	auto time_end_wt = std::chrono::high_resolution_clock::now();
+	auto elapsed_wt_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_wt-time_start_wt).count();
+	double elapsed_wt = 1.0e-6 * elapsed_wt_count;
+	if( mpi_rank == 0 ) {
+	  std::cout << " " << make_timestamp()
+		    << " sbd: end weight truncation [Elapsed time "
+		    << elapsed_wt << " (sec)]" << std::endl;
+	  std::cout << " " << make_timestamp()
+		    << " sbd: start redistribution of wavefunction data" << std::endl;
+	}
+	auto time_start_rd = std::chrono::high_resolution_clock::now();
+	redistribution_bitarray(cdet,cw,b_comm);
+	auto time_end_rd = std::chrono::high_resolution_clock::now();
+	auto elapsed_rd_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_rd-time_start_rd).count();
+	double elapsed_rd = 1.0e-6 * elapsed_rd_count;
+	if( mpi_rank == 0 ) {
+	  std::cout << " " << make_timestamp()
+		    << " sbd: end redistribution of wavefunction data [Elapsed time "
+		    << elapsed_rd << " (sec)]" << std::endl;
+	  std::cout << " " << make_timestamp()
+		    << " sbd: start heatbath expansion" << std::endl;
+	}
+	auto time_start_hb = std::chrono::high_resolution_clock::now();
+	int hb_type = (co_type == 2) ? 0 : 1;
+	HeatbathExpansion(cdet,cw,bit_length,static_cast<size_t>(L),I0,I1,I2,
+			  hb_type,hb_cutoff,hb_batch_size,rdet,b_comm,comm);
+	auto time_end_hb = std::chrono::high_resolution_clock::now();
+	auto elapsed_hb_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_hb-time_start_hb).count();
+	double elapsed_hb = 1.0e-6 * elapsed_hb_count;
+	if( mpi_rank == 0 ) {
+	  std::cout << " " << make_timestamp()
+		    << " sbd: end heatbath expansion [Elapsed time "
+		    << elapsed_hb << " (sec)]" << std::endl;
 	}
       }
 
@@ -505,6 +610,7 @@ namespace sbd {
 	}
 	auto time_start_save = std::chrono::high_resolution_clock::now();
 	SaveWavefunction(savename,det,h_comm,b_comm,t_comm,w);
+	if( sbd_data.timing_barriers ) MPI_Barrier(comm);
 	auto time_end_save = std::chrono::high_resolution_clock::now();
 	auto elapsed_save_count = std::chrono::duration_cast<std::chrono::microseconds>(time_end_save-time_start_save).count();
 	double elapsed_save = 1.0e-6 * elapsed_save_count;
@@ -539,7 +645,7 @@ namespace sbd {
 	      const std::string & savename,
 	      double & energy,
 	      std::vector<double> & density,
-	      std::vector<std::vector<size_t>> & rdet,
+	      sbd::det_vector<size_t> & rdet,
 	      std::vector<std::vector<ElemT>> & one_p_rdm,
 	      std::vector<std::vector<ElemT>> & two_p_rdm) {
       int mpi_master = 0;
@@ -589,6 +695,8 @@ namespace sbd {
       int b_comm_size = sbd_data.b_comm_size;
       int h_comm_size = mpi_size / (t_comm_size*b_comm_size);
       size_t bit_length = sbd_data.bit_length;
+      det_vector<size_t>::init_elem_size((2*L + bit_length - 1) / bit_length);
+      det_vector<size_t, det_kind::half>::init_elem_size((L + bit_length - 1) / bit_length);
       MPI_Comm h_comm;
       MPI_Comm b_comm;
       MPI_Comm t_comm;
@@ -600,7 +708,7 @@ namespace sbd {
       int mpi_rank_b; MPI_Comm_rank(b_comm,&mpi_rank_b);
       int mpi_size_t; MPI_Comm_size(t_comm,&mpi_size_t);
       int mpi_rank_t; MPI_Comm_rank(t_comm,&mpi_rank_t);
-      std::vector<std::vector<size_t>> det;
+      det_vector<size_t> det;
       if( mpi_rank_h == 0 ) {
 	if( mpi_rank_t == 0 ) {
 	  load_basis_from_files(detfiles,det,bit_length,2*L,b_comm);
@@ -609,6 +717,8 @@ namespace sbd {
 	    reordering(det,bit_length,2*L,b_comm);
 	  } else if ( sbd_data.do_redist_det ) {
 	    redistribution(det,bit_length,2*L,b_comm);
+	  } else if ( sbd_data.do_redist_alpha_eq ) {
+	    redistribution_equal_bra_a(det,bit_length,2*L,b_comm);
 	  }
 	}
 	MpiBcast(det,0,t_comm);
