@@ -5,6 +5,8 @@
 #ifndef SBD_CHEMISTRY_GDB_DAVIDSON_H
 #define SBD_CHEMISTRY_GDB_DAVIDSON_H
 
+#include <chrono>
+
 namespace sbd {
   namespace gdb {
     
@@ -405,9 +407,16 @@ namespace sbd {
 #endif
 	  
 	  Zero(Hv[ib]);
+	  auto _mv_t0 = std::chrono::high_resolution_clock::now();
 	  mult(hii,v[ib],Hv[ib],bit_length,norb,
 	       det,idxmap,exidx,I0,I1,I2,
 	       h_comm,b_comm,t_comm);
+	  if( mpi_rank_h == 0 && mpi_rank_b == 0 && mpi_rank_t == 0 ) {
+	    std::cout << " [gdb matvec] it=" << it << " ib=" << ib << " time="
+		      << std::chrono::duration<double>(
+			   std::chrono::high_resolution_clock::now() - _mv_t0).count()
+		      << " s" << std::endl;
+	  }
 
 #ifdef SBD_DEBUG_MULT
 	  for(int rank_h=0; rank_h < mpi_size_h; rank_h++) {

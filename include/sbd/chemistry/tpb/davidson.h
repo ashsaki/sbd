@@ -5,6 +5,8 @@
 #ifndef SBD_CHEMISTRY_TPB_DAVIDSON_H
 #define SBD_CHEMISTRY_TPB_DAVIDSON_H
 
+#include <chrono>
+
 #include "sbd/framework/jacobi.h"
 #include "sbd/framework/hp_numeric.h"
 #include "sbd/framework/dm_vector.h"
@@ -229,6 +231,8 @@ x = 0    1    2    3
 
       for(int ib=0; ib < nb; ib++) {
 
+	auto step_start = std::chrono::high_resolution_clock::now();
+
 	Zero(HC[ib]);
 	mult(hii,ih,jh,hij,len,
 	     tasktype,adetshift,bdetshift,adet_comm_size,bdet_comm_size,
@@ -316,7 +320,9 @@ x = 0    1    2    3
 	std::cout << " Davidson iteration " << it << "." << ib
 		  << " at mpi (h,b,t) = ("
 		  << mpi_rank_h << "," << mpi_rank_b << ","
-		  << mpi_rank_t << "): (tol=" << norm_R << "):";
+		  << mpi_rank_t << "): (tol=" << norm_R << ", time="
+	  << std::chrono::duration<double>(std::chrono::high_resolution_clock::now()-step_start).count()
+	  << "s):";
 	for(int p=0; p < std::min(ib+1,4); p++) {
 	  std::cout << " " << E[p];
 	}
@@ -326,7 +332,9 @@ x = 0    1    2    3
 	  if( mpi_rank_t == 0 ) {
 	    if( mpi_rank_b == 0 ) {
 	      std::cout << " Davidson iteration " << it << "." << ib
-			<< " (tol=" << norm_R << "):";
+			<< " (tol=" << norm_R << ", time="
+	  << std::chrono::duration<double>(std::chrono::high_resolution_clock::now()-step_start).count()
+	  << "s):";
 	      for(int p=0; p < std::min(ib+1,4); p++) {
 		std::cout << " " << E[p];
 	      }
@@ -476,6 +484,8 @@ x = 0    1    2    3
 
       for(int ib=0; ib < nb; ib++) {
 
+	auto step_start = std::chrono::high_resolution_clock::now();
+
 	Zero(HC[ib]);
 	mult(hii,C[ib],HC[ib],
 	     adets,bdets,bit_length,norbs,
@@ -567,7 +577,9 @@ x = 0    1    2    3
 	std::cout << " Davidson iteration " << it << "." << ib
 		  << " at mpi (h,b,t) = ("
 		  << mpi_rank_h << "," << mpi_rank_b << ","
-		  << mpi_rank_t << "): (tol=" << norm_R << "):";
+		  << mpi_rank_t << "): (tol=" << norm_R << ", time="
+	  << std::chrono::duration<double>(std::chrono::high_resolution_clock::now()-step_start).count()
+	  << "s):";
 	for(int p=0; p < std::min(ib+1,4); p++) {
 	  std::cout << " " << E[p];
 	}
@@ -577,7 +589,9 @@ x = 0    1    2    3
 	  if( mpi_rank_t == 0 ) {
 	    if( mpi_rank_b == 0  ) {
 	      std::cout << " Davidson iteration " << it << "." << ib
-			<< " (tol=" << norm_R << "):";
+			<< " (tol=" << norm_R << ", time="
+	  << std::chrono::duration<double>(std::chrono::high_resolution_clock::now()-step_start).count()
+	  << "s):";
 	      for(int p=0; p < std::min(ib+1,4); p++) {
 		std::cout << " " << E[p];
 	      }
@@ -831,7 +845,9 @@ x = 0    1    2    3
 	std::cout << " Davidson iteration " << it << "." << ib
 		  << " at mpi (h,b,t) = ("
 		  << mpi_rank_h << "," << mpi_rank_b << ","
-		  << mpi_rank_t << "): (tol=" << norm_R << "):";
+		  << mpi_rank_t << "): (tol=" << norm_R << ", time="
+	  << std::chrono::duration<double>(std::chrono::high_resolution_clock::now()-step_start).count()
+	  << "s):";
 	for(int p=0; p < std::min(ib+1,4); p++) {
 	  std::cout << " " << E[p];
 	}
@@ -841,7 +857,9 @@ x = 0    1    2    3
 	  if( mpi_rank_t == 0 ) {
 	    if( mpi_rank_b == 0 ) {
 	      std::cout << " Davidson iteration " << it << "." << ib
-			<< " (tol=" << norm_R << "):";
+			<< " (tol=" << norm_R << ", time="
+	  << std::chrono::duration<double>(std::chrono::high_resolution_clock::now()-step_start).count()
+	  << "s):";
 	      for(int p=0; p < std::min(ib+1,4); p++) {
 		std::cout << " " << E[p];
 	      }
